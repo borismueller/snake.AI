@@ -4,6 +4,7 @@ import random
 class Snake(object):
     """SNAKE GAME :)=)))))))))))))))"""
     def __init__(self, dimension=9, seed=None):
+        random.seed(3)
         if (seed == None):
             self.seed = random.randint(0, 10)
         else:
@@ -81,14 +82,14 @@ class Snake(object):
         """Set player and first apple"""
         self.field = [[self.fieldState['Empty'] for i in range(dimension)] for j in range(dimension)]
         random.seed(seed)
-        appleSeed = random.randint(0, dimension)
+        appleSeed = random.randint(0, dimension - 1)
         self.initApple(dimension, appleSeed)
         self.initSnake()
 
     def initApple(self, dimension, seed):
         #TODO make sure apple doenst spawn in snake
         random.seed(seed)
-        posY = random.randint(0, dimension)
+        posY = random.randint(0, dimension - 1)
         self.field[seed][posY] = self.fieldState['Apple']
 
     def initSnake(self):
