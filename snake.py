@@ -16,17 +16,15 @@ class Snake(object):
         self.dimension = dimension
         self.field = []
         self.snake = []
-        self.snakeDirection = self.directions['North']
+        self.snakeDirection = self.directions['East']
         self.score = 0
-        self.initGame(dimension, seed)
-        self.render()
+        #self.initGame(dimension, seed)
+        #self.render()
 
     def step(self, action):
         """Act with action upon enviroment """
 
         (headY, headX) = self.snake[0]
-
-        print(self.snakeDirection)
 
         if (action == 0):
             #go left
@@ -92,6 +90,7 @@ class Snake(object):
         else:
             reward = 1
 
+        #redraw snake
         for snek in self.snake:
             (x, y) = snek
             try:
@@ -101,6 +100,9 @@ class Snake(object):
                 #we ran into a wall :C
                 return (self.field, self.snakeDirection, True, reward)
             snek = self.field[x][y]
+
+
+        print(len(self.snake))
 
         #add new snake head
         (x, y) = self.snake[0]
@@ -136,6 +138,7 @@ class Snake(object):
         self.field = [[self.fieldState['Empty'] for i in range(dimension)] for j in range(dimension)]
         random.seed(seed)
         appleSeed = random.randint(0, dimension - 1)
+        self.dimension = dimension
         self.initApple(dimension, appleSeed)
         self.initSnake()
 
@@ -143,8 +146,6 @@ class Snake(object):
         #TODO sometimes recurses forever
         #random.seed(seed)
         posY = random.randint(0, dimension - 1)
-
-        print(seed, posY)
 
         if self.field[seed][posY] == 0:
             #position is empty
@@ -171,7 +172,7 @@ class Snake(object):
         if (x, y) == self.applePos:
             print("gj")
             self.score += 1
-            print(self.score)
+            print("Score: ", self.score)
             self.initApple(self.dimension, self.seed)
             return True
         else:
