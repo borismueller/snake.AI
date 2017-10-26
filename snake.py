@@ -17,38 +17,86 @@ class Snake(object):
         self.field = []
         self.snake = []
         self.snakeDirection = self.directions['North']
+        self.score = 0
         self.initGame(dimension, seed)
         self.render()
 
     def step(self, action):
         """Act with action upon enviroment """
 
-        print(self.snake)
+        (headY, headX) = self.snake[0]
 
-        if (action == 2):
-            #go forward, change head position
-            oldSnake = self.snake
-            (headX, headY) = self.snake[0]
+        print(self.snakeDirection)
+
+        if (action == 0):
+            #go left
             if (self.snakeDirection == 0):
                 #North
-                self.snake.insert(0, (headX, headY + 1))
+                self.snake.insert(0, (headY, headX - 1))
+                self.snakeDirection = 3
             elif (self.snakeDirection == 1):
                 #East
-                self.snake.insert(0, (headX + 1, headY))
+                self.snake.insert(0, (headY - 1, headX))
+                self.snakeDirection = 0
             elif (self.snakeDirection == 2):
                 #South
-                self.snake.insert(0,(headX, headY - 1))
+                self.snake.insert(0,(headY, headX + 1))
+                self.snakeDirection = 1
             elif (self.snakeDirection == 3):
                 #West
-                self.snake.insert(0, (headX - 1, headY))
+                self.snake.insert(0, (headY + 1, headX))
+                self.snakeDirection = 2
 
-        #reset last part of snake
-        (x, y) = self.snake.pop()
-        self.field[x][y] = self.fieldState['Empty']
+        if (action == 1):
+            #go right
+            if (self.snakeDirection == 0):
+                #North
+                self.snake.insert(0, (headY, headX + 1))
+                self.snakeDirection = 1
+            elif (self.snakeDirection == 1):
+                #East
+                self.snake.insert(0, (headY + 1, headX))
+                self.snakeDirection = 2
+            elif (self.snakeDirection == 2):
+                #South
+                self.snake.insert(0,(headY, headX - 1))
+                self.snakeDirection = 3
+            elif (self.snakeDirection == 3):
+                #West
+                self.snake.insert(0, (headY - 1, headX))
+                self.snakeDirection = 0
+
+        elif (action == 2):
+            #go forward, change head position
+            if (self.snakeDirection == 0):
+                #North
+                self.snake.insert(0, (headY - 1, headX))
+            elif (self.snakeDirection == 1):
+                #East
+                self.snake.insert(0, (headY, headX + 1))
+            elif (self.snakeDirection == 2):
+                #South
+                self.snake.insert(0,(headY + 1, headX))
+            elif (self.snakeDirection == 3):
+                #West
+                self.snake.insert(0, (headY, headX - 1))
+
+
+        #check if we ate an apple
+        (x, y) = self.snake[0]
+        if not self.eatApple(x, y):
+            #reset last part of snake, because we didn't eat an apple
+            (a, b) = self.snake.pop()
+            self.field[a][b] = self.fieldState['Empty']
 
         for snek in self.snake:
             (x, y) = snek
-            self.field[x][y] = self.fieldState['Snake']
+            try:
+                self.field[x][y] = self.fieldState['Snake']
+            except IndexError:
+                print("ohno")
+                self.reset()
+                return
             snek = self.field[x][y]
 
         #add new snake head
@@ -87,10 +135,19 @@ class Snake(object):
         self.initSnake()
 
     def initApple(self, dimension, seed):
-        #TODO make sure apple doenst spawn in snake
-        random.seed(seed)
+        #TODO sometimes recurses forever
+        #random.seed(seed)
         posY = random.randint(0, dimension - 1)
-        self.field[seed][posY] = self.fieldState['Apple']
+
+        print(seed, posY)
+
+        if self.field[seed][posY] == 0:
+            #position is empty
+            self.field[seed][posY] = self.fieldState['Apple']
+            self.applePos = (seed, posY)
+        else:
+            #try again
+            self.initApple(dimension, posY)
 
     def initSnake(self):
         posX = 5
@@ -105,6 +162,12 @@ class Snake(object):
 
         self.snakeDirection = self.directions['East']
 
-    def eatApple(self):
-        #TODO
-        print("hahah")
+    def eatApple(self, x, y):
+        if (x, y) == self.applePos:
+            print("gj")
+            self.score += 1
+            print(self.score)
+            self.initApple(self.dimension, self.seed)
+            return True
+        else:
+            return False
