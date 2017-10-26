@@ -88,20 +88,25 @@ class Snake(object):
             #reset last part of snake, because we didn't eat an apple
             (a, b) = self.snake.pop()
             self.field[a][b] = self.fieldState['Empty']
+            reward = 0
+        else:
+            reward = 1
 
         for snek in self.snake:
             (x, y) = snek
             try:
                 self.field[x][y] = self.fieldState['Snake']
             except IndexError:
-                print("ohno")
                 self.reset()
-                return
+                #we ran into a wall :C
+                return (self.field, self.snakeDirection, True, reward)
             snek = self.field[x][y]
 
         #add new snake head
         (x, y) = self.snake[0]
         self.field[x][y] = self.fieldState['SnakeHead']
+
+        return (self.field, self.snakeDirection, False, reward)
 
     def reset(self):
         """Reset enviroment """
