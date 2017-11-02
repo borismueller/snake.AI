@@ -97,7 +97,7 @@ class Snake(object):
             try:
                 self.field[x][y] = self.fieldState['Snake']
             except IndexError:
-                self.reset()
+                #self.reset()
                 #we ran into a wall :C
                 return (self.field, self.snakeDirection, True, reward)
             snek = self.field[x][y]

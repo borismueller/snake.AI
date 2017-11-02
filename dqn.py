@@ -6,10 +6,11 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 
+from termcolor import colored
+
 class DQNetwork(object):
-    def __init__(self, state_size=100, num_hidden=24, learning_rate=0.1):
+    def __init__(self, state_size=100, learning_rate=0.1):
         self.state_size = state_size
-        self.num_hidden = num_hidden
         self.learning_rate = learning_rate
         self.gamma = 0.95
         self.epsilon = 1.0
@@ -25,11 +26,11 @@ class DQNetwork(object):
         self.snake.initGame(10, 3)
 
     def initModel(self):
-        num_hidden = self.num_hidden
         model = Sequential()
 
-        model.add(Dense(num_hidden, input_dim=10, activation='relu'))
-        model.add(Dense(num_hidden, activation='relu'))
+        model.add(Dense(100, input_dim=10, activation='relu'))
+        model.add(Dense(100, activation='relu'))
+        model.add(Dense(100, activation='relu'))
         model.add(Dense(self.action_size, activation='linear'))
 
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
@@ -66,13 +67,17 @@ class DQNetwork(object):
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=100):
+    def train(self, episodes=20, render=False):
+        tot_score = 0
+        high_score = 0
         for i in range(episodes):
             state = self.snake.reset()[0]
             self.initSnake()
 
-            for frame in range(100):
-                #snake.render()
+            for frame in range(1000):
+                if render:
+                    self.snake.render()
+                    print("")
                 action = self.act(state)
 
                 next_state, next_dir, done, reward = self.snake.step(action)
@@ -82,7 +87,20 @@ class DQNetwork(object):
                 state = next_state
 
                 if done:
-                    print("episode: {}/{} score: {}".format(i, episodes, self.snake.score))
+                    tot_score += self.snake.score
+                    if self.snake.score > high_score:
+                        high_score = self.snake.score
+                    if self.snake.score > 0:
+                        print(colored("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame), "green"))
+                    else:
+                        print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
                     break
 
-            self.replay(32)
+            self.replay(20)
+        print("done after {} episodes, total score: {}, efficency: {}/{} = {}, high score: {}".format(episodes, tot_score, episodes, tot_score, tot_score/episodes, high_score))
+
+    def save(self, name):
+        self.model.save_weights(name)
+
+    def load(self, name):
+        self.model.load_weights(name)
