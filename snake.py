@@ -91,6 +91,7 @@ class Snake(object):
             reward = 1
 
         #redraw snake
+        #TODO kill snake when it hits itself
         for snek in self.snake:
             (x, y) = snek
             try:
@@ -102,7 +103,6 @@ class Snake(object):
             snek = self.field[x][y]
 
 
-        print(len(self.snake))
 
         #add new snake head
         (x, y) = self.snake[0]
@@ -115,12 +115,15 @@ class Snake(object):
         self.field = []
         self.snake = []
 
+        self.initGame(self.dimension, self.seed)
+
+        return (self.field, self.snakeDirection, False, 0)
+
     def render(self):
         """Render enviroment """
-        field = self.field
         for i in range(self.dimension):
             for j in range(self.dimension):
-                print(field[i][j], end=" ")
+                print(self.field[i][j], end=" ")
             print("")
 
     def close(self):
@@ -170,9 +173,7 @@ class Snake(object):
 
     def eatApple(self, x, y):
         if (x, y) == self.applePos:
-            print("gj")
             self.score += 1
-            print("Score: ", self.score)
             self.initApple(self.dimension, self.seed)
             return True
         else:
