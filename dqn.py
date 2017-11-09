@@ -9,7 +9,8 @@ from keras.optimizers import Adam
 from termcolor import colored
 
 class DQNetwork(object):
-    def __init__(self, state_size=100, learning_rate=0.1, epsilon=0.606):
+    def __init__(self, state_size=100, learning_rate=0.8117, epsilon=0.606):
+        #learning_rate = 0.8117 after testing
         #Epsilon = 0.606 after testing
         self.state_size = state_size
         self.learning_rate = learning_rate
@@ -52,7 +53,11 @@ class DQNetwork(object):
         self.memory.append((state, action, reward, next_state, done))
 
     def replay(self, batch_size):
-        minibatch = random.sample(self.memory, batch_size)
+        try:
+            minibatch = random.sample(self.memory, batch_size)
+        except Exception as e:
+            #happens when the first epsiodes aren't long enough
+            pass
 
         for state, action, reward, next_state, done in minibatch:
             #make reward our target if done
