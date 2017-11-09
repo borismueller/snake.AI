@@ -9,11 +9,11 @@ from keras.optimizers import Adam
 from termcolor import colored
 
 class DQNetwork(object):
-    def __init__(self, state_size=100, learning_rate=0.1):
+    def __init__(self, state_size=100, learning_rate=0.1, epsilon=1.0):
         self.state_size = state_size
         self.learning_rate = learning_rate
-        self.gamma = 0.95
-        self.epsilon = 1.0
+        self.gamma = 0.2
+        self.epsilon = epsilon
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.memory = deque(maxlen=2000)
@@ -36,6 +36,7 @@ class DQNetwork(object):
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
         self.model = model
+        return model
 
     def act(self, state):
         if np.random.randn() <= self.epsilon:
@@ -81,10 +82,10 @@ class DQNetwork(object):
                 action = self.act(state)
 
                 next_state, next_dir, done, reward = self.snake.step(action)
-
                 self.remember(state, action, reward, next_state, done)
-
                 state = next_state
+                if (self.epsilon * self.epsilon_decay >= self.epsilon_min):
+                    self.epsilon *= self.epsilon_decay
 
                 if done:
                     tot_score += self.snake.score
@@ -96,8 +97,9 @@ class DQNetwork(object):
                         print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
                     break
 
-            self.replay(20)
+            self.replay(10)
         print("done after {} episodes, total score: {}, efficency: {}/{} = {}, high score: {}".format(episodes, tot_score, episodes, tot_score, tot_score/episodes, high_score))
+        return(tot_score/episodes, high_score)
 
     def save(self, name):
         self.model.save_weights(name)
