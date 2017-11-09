@@ -13,13 +13,14 @@ class Optimizer(object):
 
         start = 0.0
         end = 1.0
-        for _ in range(20):
+        for i in range(10):
             if self.fun(start, end, episodes):
                 start = start
                 end = random.uniform(start, end)
             else:
                 start = random.uniform(start, end)
                 end = end
+            print("episode {}/{}".format(i, 10))
         print("start: {} end: {}".format(start, end))
 
 

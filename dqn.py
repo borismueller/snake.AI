@@ -9,7 +9,8 @@ from keras.optimizers import Adam
 from termcolor import colored
 
 class DQNetwork(object):
-    def __init__(self, state_size=100, learning_rate=0.1, epsilon=1.0):
+    def __init__(self, state_size=100, learning_rate=0.1, epsilon=0.606):
+        #Epsilon = 0.606 after testing
         self.state_size = state_size
         self.learning_rate = learning_rate
         self.gamma = 0.2
