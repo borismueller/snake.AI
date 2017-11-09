@@ -1,0 +1,23 @@
+RELU, DEFAULT: 0.096; 5; 10000
+hard_sigmoid, DEFAULT: done after 10000 episodes, total score: 825, efficency: 10000/825 = 0.0825, high score: 5
+TANH, DEFAULT: done after 10000 episodes, total score: 1012, efficency: 10000/1012 = 0.1012, high score: 6
+
+
+change gamma from 0.95 to 0.05
+RELU: done after 1000 episodes, total score: 133, efficency: 1000/133 = 0.133, high score: 3
+RELU: done after 10000 episodes, total score: 1065, efficency: 10000/1065 = 0.1065, high score: 6
+
+change gamma from 0.05 to 0.1
+RELU: done after 1000 episodes, total score: 112, efficency: 1000/112 = 0.112, high score: 3
+RELU: done after 10000 episodes, total score: 1206, efficency: 10000/1206 = 0.1206, high score: 4
+
+change gamma from 0.1 to 0.5
+RELU: done after 10000 episodes, total score: 857, efficency: 10000/857 = 0.0857, high score: 5
+
+change gamma to 0.3
+RELU: done after 10000 episodes, total score: 1334, efficency: 10000/1334 = 0.1334, high score: 7
+
+change gamma to 0.2
+RELU: done after 10000 episodes, total score: 1727, efficency: 10000/1727 = 0.1727, high score: 7
+
+change gamma to 0.25
