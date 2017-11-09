@@ -9,9 +9,10 @@ from keras.optimizers import Adam
 from termcolor import colored
 
 class DQNetwork(object):
-    def __init__(self, state_size=100, learning_rate=0.1):
+    def __init__(self, state_size=100, learning_rate=0.1, learning_rate_decay=0.01):
         self.state_size = state_size
         self.learning_rate = learning_rate
+        self.learning_rate_decay = learning_rate_decay
         self.gamma = 0.95
         self.epsilon = 1.0
         self.epsilon_min = 0.01
@@ -26,16 +27,12 @@ class DQNetwork(object):
         self.snake.initGame(10, 3)
 
     def initModel(self):
-        model = Sequential()
-
-        model.add(Dense(100, input_dim=10, activation='relu'))
-        model.add(Dense(100, activation='relu'))
-        model.add(Dense(100, activation='relu'))
-        model.add(Dense(self.action_size, activation='linear'))
-
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
-
-        self.model = model
+    	model = Sequential()
+    	model.add(Dense(24, input_dim=10, activation='tanh'))
+    	model.add(Dense(48, activation='tanh'))
+    	model.add(Dense(self.action_size, activation='linear'))
+    	model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate, decay=self.learning_rate_decay))
+    	self.model = model
 
     def act(self, state):
         if np.random.randn() <= self.epsilon:
@@ -67,7 +64,7 @@ class DQNetwork(object):
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=20, render=False):
+    def train(self, episodes=20, render=True):
         tot_score = 0
         high_score = 0
         for i in range(episodes):
@@ -96,7 +93,7 @@ class DQNetwork(object):
                         print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
                     break
 
-            self.replay(20)
+            self.replay(10)
         print("done after {} episodes, total score: {}, efficency: {}/{} = {}, high score: {}".format(episodes, tot_score, episodes, tot_score, tot_score/episodes, high_score))
 
     def save(self, name):
