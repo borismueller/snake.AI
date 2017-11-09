@@ -9,12 +9,12 @@ from keras.optimizers import Adam
 from termcolor import colored
 
 class DQNetwork(object):
-    def __init__(self, state_size=100, learning_rate=0.1, learning_rate_decay=0.01):
+    def __init__(self, state_size=100, learning_rate=0.1, epsilon=0.606):
+        #Epsilon = 0.606 after testing
         self.state_size = state_size
         self.learning_rate = learning_rate
-        self.learning_rate_decay = learning_rate_decay
-        self.gamma = 0.95
-        self.epsilon = 1.0
+        self.gamma = 0.2
+        self.epsilon = epsilon
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.memory = deque(maxlen=2000)
@@ -27,12 +27,17 @@ class DQNetwork(object):
         self.snake.initGame(10, 3)
 
     def initModel(self):
-    	model = Sequential()
-    	model.add(Dense(24, input_dim=10, activation='tanh'))
-    	model.add(Dense(48, activation='tanh'))
-    	model.add(Dense(self.action_size, activation='linear'))
-    	model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate, decay=self.learning_rate_decay))
-    	self.model = model
+        model = Sequential()
+
+        model.add(Dense(100, input_dim=10, activation='relu'))
+        model.add(Dense(100, activation='relu'))
+        model.add(Dense(100, activation='relu'))
+        model.add(Dense(self.action_size, activation='linear'))
+
+        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
+
+        self.model = model
+        return model
 
     def act(self, state):
         if np.random.randn() <= self.epsilon:
@@ -78,10 +83,10 @@ class DQNetwork(object):
                 action = self.act(state)
 
                 next_state, next_dir, done, reward = self.snake.step(action)
-
                 self.remember(state, action, reward, next_state, done)
-
                 state = next_state
+                if (self.epsilon * self.epsilon_decay >= self.epsilon_min):
+                    self.epsilon *= self.epsilon_decay
 
                 if done:
                     tot_score += self.snake.score
@@ -95,6 +100,7 @@ class DQNetwork(object):
 
             self.replay(10)
         print("done after {} episodes, total score: {}, efficency: {}/{} = {}, high score: {}".format(episodes, tot_score, episodes, tot_score, tot_score/episodes, high_score))
+        return(tot_score/episodes, high_score)
 
     def save(self, name):
         self.model.save_weights(name)
