@@ -31,7 +31,10 @@ change gamma to 0.175
 RELU: done after 10000 episodes, total score: 1694, efficency: 10000/1694 = 0.1694, high score: 5
 
 change gamma to 0.1625
-RELU:
+RELU: done after 10000 episodes, total score: 1726, efficency: 10000/1726 = 0.1726, high score: 7
+
+change gamma to 0.1525
+RELU: 
 
 change gamma to 0.125
 RELU: done after 10000 episodes, total score: 743, efficency: 10000/743 = 0.0743, high score: 5
