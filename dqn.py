@@ -74,7 +74,7 @@ class DQNetwork(object):
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=20, render=False):
+    def train(self, episodes=20, render=True):
         tot_score = 0
         high_score = 0
         for i in range(episodes):
