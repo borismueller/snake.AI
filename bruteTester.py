@@ -8,7 +8,7 @@ class Tester(object):
 		bestEfficiency = 0
 		epsilon = random.uniform(0, 1)
 
-		for i in range(100)
+		for i in range(100):
 			model = dqn.DQNetwork(epsilon=epsilon)
 			efficiency = model.train(episodes=episodes)
 			if (efficiency[0] >= bestEfficiency):
