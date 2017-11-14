@@ -1,6 +1,7 @@
 import snake
 import numpy as np
 import random
+import tensorflow as tf
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
@@ -74,7 +75,7 @@ class DQNetwork(object):
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=20, render=True):
+    def train(self, episodes=20, render=False):
         tot_score = 0
         high_score = 0
         for i in range(episodes):
@@ -103,7 +104,7 @@ class DQNetwork(object):
                         print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
                     break
 
-            self.replay(10)
+            self.replay(3)
         print("done after {} episodes, total score: {}, efficency: {}/{} = {}, high score: {}".format(episodes, tot_score, episodes, tot_score, tot_score/episodes, high_score))
         return(tot_score/episodes, high_score)
 
