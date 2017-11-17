@@ -2,6 +2,7 @@ import snake
 import numpy as np
 import random
 import tensorflow as tf
+from tkinter import *
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
@@ -48,6 +49,7 @@ class DQNetwork(object):
         else:
             #predict action based on model
             actions = self.model.predict(state)
+            print("Neural Network prediction: {}".format(actions))
             return np.argmax(actions[0])
 
     def remember(self, state, action, reward, next_state, done):
@@ -58,7 +60,7 @@ class DQNetwork(object):
             minibatch = random.sample(self.memory, batch_size)
         except Exception as e:
             #happens when the first epsiodes aren't long enough
-            pass
+            minibatch = random.sample(self.memory, 3)
 
         for state, action, reward, next_state, done in minibatch:
             #make reward our target if done
@@ -67,6 +69,7 @@ class DQNetwork(object):
             if not done:
                 #predict future discounted reward
                 target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
+                print("target: {}".format(target))
 
         #predict future reward based on current state using our network
         target_f = self.model.predict(state)
@@ -75,20 +78,25 @@ class DQNetwork(object):
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=20, render=False):
+    def train(self, episodes=20, render=True):
         tot_score = 0
         high_score = 0
+
+        master = Tk()
+        w = Canvas(master, width=200, height=200)
+        w.pack()
+
         for i in range(episodes):
             state = self.snake.reset()[0]
             self.initSnake()
 
-            for frame in range(1000):
+            for frame in range(100):
                 if render:
-                    self.snake.render()
-                    print("")
+                    self.snake.render(master=master, w=w)
                 action = self.act(state)
 
                 next_state, next_dir, done, reward = self.snake.step(action)
+                print("reward: {}".format(reward))
                 self.remember(state, action, reward, next_state, done)
                 state = next_state
                 if (self.epsilon * self.epsilon_decay >= self.epsilon_min):
@@ -104,7 +112,7 @@ class DQNetwork(object):
                         print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
                     break
 
-            self.replay(3)
+            self.replay(30)
         print("done after {} episodes, total score: {}, efficency: {}/{} = {}, high score: {}".format(episodes, tot_score, episodes, tot_score, tot_score/episodes, high_score))
         return(tot_score/episodes, high_score)
 

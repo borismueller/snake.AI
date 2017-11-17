@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from tkinter import *
 
 class Snake(object):
     """SNAKE GAME :)=)))))))))))))))"""
@@ -119,12 +120,25 @@ class Snake(object):
 
         return (self.field, self.snakeDirection, False, 0)
 
-    def render(self):
+    def render(self, master, w):
         """Render enviroment """
         for i in range(self.dimension):
             for j in range(self.dimension):
-                print(self.field[i][j], end=" ")
+                if (self.field[i][j] == 3):
+                    w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="red")
+                    #print("@", end=" ")
+                elif (self.field[i][j] == 2):
+                    w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="green")
+                    #print("o", end=" ")
+                elif (self.field[i][j] == 1):
+                    w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="lightgreen")
+                    #print(".", end=" ")
+                else:
+                    w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="white")
+                    #print(" ", end=" ")
+                #print(self.field[i][j], end=" ")
             print("")
+        master.update()
 
     def close(self):
         """End everything & clean up """
