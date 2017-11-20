@@ -27,7 +27,7 @@ class DQNetwork(object):
 
     def initSnake(self, dimension=10, seed=3):
         self.snake = snake.Snake()
-        self.snake.initGame(10, 3)
+        self.snake.initGame(10)
 
     def initModel(self):
         model = Sequential()
@@ -52,17 +52,17 @@ class DQNetwork(object):
             print("Neural Network prediction: {}".format(actions))
             return np.argmax(actions[0])
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+    def remember(self, next_state, state, action, reward, score, done):
+        self.memory.append((next_state, state, action, reward, score, done))
 
     def replay(self, batch_size):
         try:
             minibatch = random.sample(self.memory, batch_size)
         except Exception as e:
             #happens when the first epsiodes aren't long enough
-            minibatch = random.sample(self.memory, 3)
+            minibatch = random.sample(self.memory, 1)
 
-        for state, action, reward, next_state, done in minibatch:
+        for next_state, state, action, reward, score, done in minibatch:
             #make reward our target if done
             target = reward
 
@@ -72,13 +72,13 @@ class DQNetwork(object):
                 print("target: {}".format(target))
 
         #predict future reward based on current state using our network
-        target_f = self.model.predict(state)
+        target_f = self.model.predict(next_state)
         target_f[0][action] = target
 
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=20, render=True):
+    def train(self, episodes=20, render=True, speedLimiter=False):
         tot_score = 0
         high_score = 0
 
@@ -92,21 +92,20 @@ class DQNetwork(object):
 
             for frame in range(100):
                 if render:
-                    self.snake.render(master=master, w=w)
+                    self.snake.render(master=master, w=w, speedLimiter=speedLimiter)
                 action = self.act(state)
 
-                next_state, next_dir, done, reward = self.snake.step(action)
+                next_state, state, reward, score, done = self.snake.step(action)
                 print("reward: {}".format(reward))
-                self.remember(state, action, reward, next_state, done)
-                state = next_state
+                self.remember(next_state, state, action, reward, score, done)
                 if (self.epsilon * self.epsilon_decay >= self.epsilon_min):
                     self.epsilon *= self.epsilon_decay
 
                 if done:
-                    tot_score += self.snake.score
-                    if self.snake.score > high_score:
-                        high_score = self.snake.score
-                    if self.snake.score > 0:
+                    tot_score += score
+                    if score > high_score:
+                        high_score = score
+                    if score > 0:
                         print(colored("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame), "green"))
                     else:
                         print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
