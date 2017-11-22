@@ -20,17 +20,7 @@ class Snake(object):
         self.initSnake()
 
     def initApple(self, dimension):
-        #TODO sometimes recurses forever
-        #random.seed(seed)
-        posX = random.randint(0, dimension - 1)
-        posY = random.randint(0, dimension - 1)
-
-        if self.field[posX][posY] == 0:
-            #position is empty
-            self.field[posX][posY] = self.fieldState['Apple']
-        else:
-            #try again
-            self.initApple(dimension)
+        self.createApple()
 
     def initSnake(self):
         posX = 5
@@ -47,7 +37,6 @@ class Snake(object):
     def step(self, action):
         """Act with action upon enviroment """
         reward = 0
-        fieldOld = self.field
         headX, headY = self.snake[0]
 
         if action == 0:
@@ -76,9 +65,9 @@ class Snake(object):
             else:
                 self.field = self.updateField(True)
                 self.snake.pop()
-            return (self.field, fieldOld, reward, self.score, False)
+            return (self.field, reward, self.score, False)
         else:
-            return (self.field, fieldOld, reward, self.score, True)
+            return (self.field, reward, self.score, True)
 
     def checkNextAction(self, x, y):
         if not ((x < 0) or (y < 0)):
@@ -87,7 +76,7 @@ class Snake(object):
             except Exception as e:
                 return (False)
 
-            if self.field[x][y] == self.fieldState['Empty']:
+            if not self.field[x][y] == self.fieldState['Snake']:
                 return (True)
             else:
                 return (False)
@@ -125,28 +114,22 @@ class Snake(object):
         self.score+=1
         return (self.score)
 
-    def render(self, master=None, w=None, speedLimiter=False):
+    def render(self, master=None, w=None, speedLimiter=None):
         """Render enviroment """
         if master and w:
             for i in range(self.dimension):
                 for j in range(self.dimension):
                     if (self.field[i][j] == 3):
-                        w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="red")
-                        #print("@", end=" ")
+                        w.create_rectangle(20*j, 20*i, 20*j+20, 20*i+20, fill="red")
                     elif (self.field[i][j] == 2):
-                        w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="green")
-                        #print("o", end=" ")
+                        w.create_rectangle(20*j, 20*i, 20*j+20, 20*i+20, fill="green")
                     elif (self.field[i][j] == 1):
-                        w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="lightgreen")
-                        #print(".", end=" ")
+                        w.create_rectangle(20*j, 20*i, 20*j+20, 20*i+20, fill="lightgreen")
                     else:
-                        w.create_rectangle(20*i, 20*j, 20*i+20, 20*j+20, fill="white")
-                        #print(" ", end=" ")
-                    #print(self.field[i][j], end=" ")
-                print("")
+                        w.create_rectangle(20*j, 20*i, 20*j+20, 20*i+20, fill="white")
             master.update()
             if speedLimiter:
-                master.after(150)
+                master.after(speedLimiter)
         else:
             for i in range(self.dimension):
                 for j in range(self.dimension):

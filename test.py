@@ -1,7 +1,7 @@
 import dqn
 
 d = dqn.DQNetwork()
-#d.train(10000, False)
-#d.train(1000, True, True)
+#d.train(1000, False)
+#d.train(1000, True, 100)
 #no speed limit
-d.train(1000, True, False)
+d.train(100, True, False)

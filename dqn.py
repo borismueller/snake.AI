@@ -48,12 +48,14 @@ class DQNetwork(object):
             return random.choice(list(self.snake.actionSpace.items()))[1]
         else:
             #predict action based on model
+            print("state: {}".format(state))
             actions = self.model.predict(state)
-            print("Neural Network prediction: {}".format(actions))
+            print("NN output: {}".format(actions))
+            print("next step: {}".format(np.argmax(actions[0])))
             return np.argmax(actions[0])
 
-    def remember(self, next_state, state, action, reward, score, done):
-        self.memory.append((next_state, state, action, reward, score, done))
+    def remember(self, state, action, reward, score, done):
+        self.memory.append((state, action, reward, score, done))
 
     def replay(self, batch_size):
         try:
@@ -62,23 +64,22 @@ class DQNetwork(object):
             #happens when the first epsiodes aren't long enough
             minibatch = random.sample(self.memory, 1)
 
-        for next_state, state, action, reward, score, done in minibatch:
+        for state, action, reward, score, done in minibatch:
             #make reward our target if done
             target = reward
 
             if not done:
                 #predict future discounted reward
-                target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
-                print("target: {}".format(target))
+                target = (reward + self.gamma * np.amax(self.model.predict(state)[0]))
 
         #predict future reward based on current state using our network
-        target_f = self.model.predict(next_state)
+        target_f = self.model.predict(state)
         target_f[0][action] = target
 
         #train the network
         self.model.fit(state, target_f, epochs=1, verbose=0)
 
-    def train(self, episodes=20, render=True, speedLimiter=False):
+    def train(self, episodes=20, render=True, speedLimiter=None):
         tot_score = 0
         high_score = 0
 
@@ -95,9 +96,8 @@ class DQNetwork(object):
                     self.snake.render(master=master, w=w, speedLimiter=speedLimiter)
                 action = self.act(state)
 
-                next_state, state, reward, score, done = self.snake.step(action)
-                print("reward: {}".format(reward))
-                self.remember(next_state, state, action, reward, score, done)
+                state, reward, score, done = self.snake.step(action)
+                self.remember(state, action, reward, score, done)
                 if (self.epsilon * self.epsilon_decay >= self.epsilon_min):
                     self.epsilon *= self.epsilon_decay
 
