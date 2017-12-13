@@ -5,11 +5,13 @@ from tkinter import *
 class Snake(object):
     """SNAKE GAME :)=)))))))))))))))"""
     def __init__(self, dimension=9):
-        self.actionSpace = {'Up': 0, 'Right': 1, 'Down': 2, 'Left': 3}
+        self.actionSpace = {'Left': 0, 'Right': 1, 'Nothing': 2}
         self.fieldState = {'Empty': 0, 'Snake': 1, 'SnakeHead': 2, 'Apple': 3}
+        self.directions = {'North': 0, 'East': 1, 'South': 2, 'West': 3}
         self.dimension = dimension
         self.field = []
         self.snake = []
+        self.snakeDirection = self.directions['East']
         self.score = 0
 
     def initGame(self, dimension):
@@ -39,21 +41,59 @@ class Snake(object):
         reward = 0
         headX, headY = self.snake[0]
 
-        if action == 0:
-            #up
-            self.snake.insert(0, (headX-1, headY))
+        if (action == 0):
+            #go left
+            if (self.snakeDirection == 0):
+                #North
+                self.snake.insert(0, (headX, headY - 1))
+                self.snakeDirection = 3
+            elif (self.snakeDirection == 1):
+                #East
+                self.snake.insert(0, (headX - 1, headY))
+                self.snakeDirection = 0
+            elif (self.snakeDirection == 2):
+                #South
+                self.snake.insert(0,(headX, headY + 1))
+                self.snakeDirection = 1
+            elif (self.snakeDirection == 3):
+                #West
+                self.snake.insert(0, (headX + 1, headY))
+                self.snakeDirection = 2
 
-        if action == 1:
-            #right
-            self.snake.insert(0, (headX, headY+1))            
+        if (action == 1):
+            #go right
+            if (self.snakeDirection == 0):
+                #North
+                self.snake.insert(0, (headX, headY + 1))
+                self.snakeDirection = 1
+            elif (self.snakeDirection == 1):
+                #East
+                self.snake.insert(0, (headX + 1, headY))
+                self.snakeDirection = 2
+            elif (self.snakeDirection == 2):
+                #South
+                self.snake.insert(0,(headX, headY - 1))
+                self.snakeDirection = 3
+            elif (self.snakeDirection == 3):
+                #West
+                self.snake.insert(0, (headX - 1, headY))
+                self.snakeDirection = 0
 
-        if action == 2:
-            #down
-            self.snake.insert(0, (headX+1, headY))
+        elif (action == 2):
+            #go forward, change head position
+            if (self.snakeDirection == 0):
+                #North
+                self.snake.insert(0, (headX - 1, headY))
+            elif (self.snakeDirection == 1):
+                #East
+                self.snake.insert(0, (headX, headY + 1))
+            elif (self.snakeDirection == 2):
+                #South
+                self.snake.insert(0,(headX + 1, headY))
+            elif (self.snakeDirection == 3):
+                #West
+                self.snake.insert(0, (headX, headY - 1))
 
-        if action == 3:
-            #left
-            self.snake.insert(0, (headX, headY-1))
 
         headX, headY = self.snake[0]
         if self.checkNextAction(headX, headY):
@@ -65,9 +105,10 @@ class Snake(object):
             else:
                 self.field = self.updateField(True)
                 self.snake.pop()
-            return (self.field, reward, self.score, False)
+            return (self.field, self.snakeDirection, False, reward)
         else:
-            return (self.field, reward, self.score, True)
+            reward = -10
+            return (self.field, self.snakeDirection, True, reward)
 
     def checkNextAction(self, x, y):
         if not ((x < 0) or (y < 0)):

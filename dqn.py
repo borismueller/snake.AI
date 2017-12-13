@@ -18,7 +18,7 @@ class DQNetwork(object):
         self.learning_rate = learning_rate
         self.gamma = 0.2
         self.epsilon = epsilon
-        self.epsilon_min = 0.01
+        self.epsilon_min = 0.0001
         self.epsilon_decay = 0.995
         self.memory = deque(maxlen=2000)
         self.initSnake()
@@ -43,8 +43,9 @@ class DQNetwork(object):
         return model
 
     def act(self, state):
-        if np.random.randn() <= self.epsilon:
-            #chooes random action
+        if np.random.randn()/4 <= self.epsilon:
+            #chooses random action
+            print("random")
             return random.choice(list(self.snake.actionSpace.items()))[1]
         else:
             #predict action based on model
@@ -54,8 +55,8 @@ class DQNetwork(object):
             print("next step: {}".format(np.argmax(actions[0])))
             return np.argmax(actions[0])
 
-    def remember(self, state, action, reward, score, done):
-        self.memory.append((state, action, reward, score, done))
+    def remember(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
 
     def replay(self, batch_size):
         try:
@@ -64,7 +65,7 @@ class DQNetwork(object):
             #happens when the first epsiodes aren't long enough
             minibatch = random.sample(self.memory, 1)
 
-        for state, action, reward, score, done in minibatch:
+        for state, action, reward, next_state, done in minibatch:
             #make reward our target if done
             target = reward
 
@@ -96,16 +97,17 @@ class DQNetwork(object):
                     self.snake.render(master=master, w=w, speedLimiter=speedLimiter)
                 action = self.act(state)
 
-                state, reward, score, done = self.snake.step(action)
-                self.remember(state, action, reward, score, done)
+                next_state, next_dir, done, reward = self.snake.step(action)
+                self.remember(state, action, reward, next_state, done)
+                state = next_state
                 if (self.epsilon * self.epsilon_decay >= self.epsilon_min):
                     self.epsilon *= self.epsilon_decay
 
                 if done:
-                    tot_score += score
-                    if score > high_score:
-                        high_score = score
-                    if score > 0:
+                    tot_score += self.snake.score
+                    if self.snake.score > high_score:
+                        high_score = self.snake.score
+                    if self.snake.score > 0:
                         print(colored("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame), "green"))
                     else:
                         print("episode: {}/{} score: {}, after: {} frames".format(i, episodes, self.snake.score, frame))
